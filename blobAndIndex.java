@@ -30,7 +30,7 @@ public class blobAndIndex {
         PrintWriter pw = new PrintWriter("objects/" + sha1);
         pw.print(fileContent);
 
-        index.append(filename + ", " + sha1 + "\n");
+        index.append(filename + ":" + sha1 + "\n");
         addToIndex(filename, sha1);
 
         pw.close();
