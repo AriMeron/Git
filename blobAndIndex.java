@@ -8,16 +8,16 @@ import java.security.NoSuchAlgorithmException;
 
 public class blobAndIndex {
 
-    private StringBuilder index;
+    private static StringBuilder index;
     
-    public void init() {
-        File f = new File("/Honors Topics/Git/objects");
+    public static void init() {
+        File f = new File("objects");
         if(!f.exists())
             f.mkdirs();
         index = new StringBuilder("");
     }
     
-    public void blob (String filename) throws IOException, NoSuchAlgorithmException {
+    public static void blob (String filename) throws IOException, NoSuchAlgorithmException {
         BufferedReader br = new BufferedReader(new FileReader(filename));
         StringBuilder fileContent = new StringBuilder();
 
@@ -25,10 +25,12 @@ public class blobAndIndex {
             fileContent.append((char) br.read());
         }
         String sha1 = generateSha1(fileContent);
+        System.out.println(sha1);
 
-        PrintWriter pw = new PrintWriter("/Honors Topics/Git/objects/" + sha1);
+        PrintWriter pw = new PrintWriter("objects/" + sha1);
         pw.print(fileContent);
 
+        index.append(filename + ", " + sha1 + "\n");
         addToIndex(filename, sha1);
 
         pw.close();
@@ -42,10 +44,9 @@ public class blobAndIndex {
         return byteArrayToHexString(ret);
     }
 
-    public void addToIndex(String filename, String sha1) throws IOException {
+    public static void addToIndex(String filename, String sha1) throws IOException {
         PrintWriter pw = new PrintWriter("index.txt");
         pw.print(index.toString());
-        pw.print(filename + ", " + sha1);
         pw.close();
     }
 
