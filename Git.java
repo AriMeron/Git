@@ -3,8 +3,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
 
 public class Git {
 
@@ -25,7 +29,6 @@ public class Git {
             fileContent.append((char) br.read());
         }
         String sha1 = generateSha1(fileContent);
-        System.out.println(sha1);
 
         PrintWriter pw = new PrintWriter("objects/" + sha1);
         pw.print(fileContent);
@@ -45,7 +48,7 @@ public class Git {
     }
 
     public static void addToIndex(String filename, String sha1) throws IOException {
-        PrintWriter pw = new PrintWriter("index.txt");
+        PrintWriter pw = new PrintWriter("index");
         pw.print(index.toString());
         pw.close();
     }
@@ -57,5 +60,34 @@ public class Git {
                 Integer.toString( ( b[i] & 0xff ) + 0x100, 16).substring( 1 );
         }
         return result;
-      }
+    }
+
+    public static void remove (String filename) throws IOException {
+        BufferedReader brIndex = new BufferedReader(new FileReader("index"));
+        StringBuilder index2 = new StringBuilder();
+        int occurences = 0;
+        String shaName = "";
+
+        //records all of the files
+        while(brIndex.ready()) {
+            String str = brIndex.readLine();
+            if(str.substring(0, filename.length()).equals(filename)) {
+                occurences++;
+                shaName = str.substring(str.indexOf(':') + 1);
+            }
+            else {
+                index2.append(str + "\n");
+            }
+        }
+            
+        if(occurences == 0) {}
+        if(occurences == 1) {
+            Path path = Paths.get("objects/" + shaName);
+            Files.delete(path);
+            PrintWriter pw = new PrintWriter("index");
+            pw.print(index2.toString());
+            pw.close();
+        }
+        brIndex.close();
+    }
 }

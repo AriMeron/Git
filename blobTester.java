@@ -8,5 +8,7 @@ public class blobTester {
         Git.blob("hello.txt");
         Git.blob("hi.txt");
         Git.blob("h.txt");
+
+        Git.remove("hello.txt");
     }
 }
