@@ -1,3 +1,4 @@
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -21,13 +22,13 @@ public class Tree {
 
     public void add (String typeOfFile, String shaOfFile, String optionalFileName) throws IOException
     {
-        FileWriter fw = new FileWriter (file);
+        BufferedWriter bw = new BufferedWriter (new FileWriter (file, true));
         if  (!names.contains (optionalFileName))
         {
             if (optionalFileName.length() > 0)
             {
                 names.add (optionalFileName);
-                fw.write ("" + typeOfFile + " : " + shaOfFile + " : " + optionalFileName);
+                bw.write ("" + typeOfFile + " : " + shaOfFile + " : " + optionalFileName + "\n");
             }
             else
             {
@@ -35,10 +36,10 @@ public class Tree {
                 {
                     trees.add (shaOfFile);
                 }
-                fw.write ("" + typeOfFile + " : " + shaOfFile);
+                bw.write ("" + typeOfFile + " : " + shaOfFile + "\n");
             }
         }
-        fw.close();
+        bw.close();
     }
 
     public void remove (String string) throws Throwable
@@ -48,7 +49,7 @@ public class Tree {
         index = theFile.indexOf (string);
         int length;
         String endString;
-        
+
         if (string.contains (".txt"))
         {
             length = 50;
