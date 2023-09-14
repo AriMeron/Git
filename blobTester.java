@@ -6,8 +6,6 @@ public class blobTester {
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
 
         Git.init();
-        File file = new File ("hello.txt");
-        Git.blob("hello.txt");
         File file2 = new File ("hi.txt");
         Git.blob("hi.txt");
         File file3 = new File ("h.txt");

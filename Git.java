@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -90,4 +91,47 @@ public class Git {
         }
         brIndex.close();
     }
+
+    public static void stringToFile (String string, String fileName) throws IOException
+        {
+            // attach a file to FileWriter
+            File file = new File ("objects/" + string);
+            file.createNewFile();
+            FileWriter fw= new FileWriter(file);
+            FileReader fr = new FileReader (fileName);
+
+            char ch;
+            String endResult = "";
+            while(fr.ready())
+                {
+                    ch = (char) fr.read();
+                    endResult += ch;
+                }
+
+
+                fw.write(endResult);
+     
+            //close the file
+            fw.close();
+            fr.close();
+        }
+
+        public static void deleteFile(String filePath) {
+
+            File file = new File(filePath);
+    
+            file.delete();
+    
+        }
+
+        public static void deleteDirectory (String dir)
+        {
+            File file = new File (dir);
+            
+        }
+
+
+
+
+
 }

@@ -15,6 +15,12 @@ public class ExampleTester {
 
     @BeforeAll
     static void setUpBeforeClass() throws Exception {
+        File file = new File ("hello.txt");
+        Git.stringToFile ("hello.txt", "test file contents");
+        Git.deleteFile ("index");
+        Git.deleteDirectory ("objects");
+        
+        
         /*
          * Utils.writeStringToFile("junit_example_file_data.txt", "test file contents");
          * Utils.deleteFile("index");
