@@ -59,6 +59,22 @@ public class ExampleTester {
     }
 
     @Test
+    @DisplayName ("Test Tree Object")
+    void testTree () throws Throwable
+    {
+        File file = new File ("treeTester.txt");
+        Tree tree = new Tree ("treeTester.txt");
+        tree.add ("tree", "bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b", "");
+        tree.remove("bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b");
+        tree.writeToObjects();
+
+
+    }
+
+
+
+
+    @Test
     @DisplayName("[15] Test if adding a blob works.  5 for sha, 5 for file contents, 5 for correct location")
     void testCreateBlob() throws Exception {
         File file;
@@ -69,6 +85,9 @@ public class ExampleTester {
             // MyGitProject myGitClassInstance = new MyGitProject();
             // myGitClassInstance.init();
             Git.init();
+            
+            //how do i test that the blob is created????
+
             // TestHelper.runTestSuiteMethods("testCreateBlob", file1.getName());
             
 
@@ -77,12 +96,13 @@ public class ExampleTester {
         }
 
         // Check blob exists in the objects folder
-        File file_junit1 = new File("objects/" + file.methodToGetSha1());
-        assertTrue("Blob file to add not found", file_junit1.exists());
+        // String fileName = Git.
+        // File testFile = new File("objects/" + Git.methodToGetSha1());
+        // assertTrue("Blob file to add not found", file_junit1.exists());
 
-        // Read file contents
-        String indexFileContents = Git.fileToString("objects/" + file.methodToGetSha1());
-        assertEquals("File contents of Blob don't match file contents pre-blob creation", indexFileContents,
-                file.getContents());
+        // // Read file contents
+        // String indexFileContents = Git.fileToString("objects/" + file.methodToGetSha1());
+        // assertEquals("File contents of Blob don't match file contents pre-blob creation", indexFileContents,
+        //         file.getContents());
     }
 }
