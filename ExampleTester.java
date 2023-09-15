@@ -1,7 +1,9 @@
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,17 +68,42 @@ public class ExampleTester {
         File reference = new File ("reference.txt");
         FileWriter fw = new FileWriter (reference);
         fw.write ("tree: bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b");
+        String sha = fileToString ("reference.txt");
         File file = new File ("treeTester.txt");
         Tree tree = new Tree ("treeTester.txt");
         tree.add ("tree", "bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b", "");
         tree.remove("bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b");
         tree.writeToObjects();
-        assertTrue (file.exists());
-        assertTrue (reference.equals (file));
+        assertTrue (tree.getName().equals (sha));
 
 
     }
 
+     public String fileToString (String fileName) throws Throwable
+        {
+            String endResult = "";
+            //File file = new File ("output.txt");
+            char ch;
+ 
+             // check if File exists or not
+            FileReader fr;
+            try
+            {
+                fr = new FileReader(fileName);
+                while(fr.ready())
+                {
+                    ch = (char) fr.read();
+                    endResult += ch;
+                }
+ 
+                fr.close();
+            } catch (Error | IOException e)
+            {
+                
+                throw e;
+            }
+            return endResult;
+        }
 
 
 
