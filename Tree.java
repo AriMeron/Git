@@ -70,28 +70,18 @@ public class Tree {
     }
 
 
-     public void stringToFile (String string, String fileName) throws IOException
+     public void stringToFile (String fileName, String string) throws IOException
         {
             // attach a file to FileWriter
-            File file = new File ("objects/" + string);
+            File file = new File ("objects/" + fileName);
             file.createNewFile();
-            FileWriter fw= new FileWriter(file);
-            FileReader fr = new FileReader (fileName);
+            BufferedWriter bw = new BufferedWriter (new FileWriter (file, true));
 
-            char ch;
-            String endResult = "";
-            while(fr.ready())
-                {
-                    ch = (char) fr.read();
-                    endResult += ch;
-                }
+            bw.write (string);
 
-
-                fw.write(endResult);
      
             //close the file
-            fw.close();
-            fr.close();
+            bw.close();
         }
 
         public String fileToString (String fileName) throws Throwable

@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.apache.commons.io.FileUtils;
 
 
 public class Git {
@@ -119,15 +120,18 @@ public class Git {
         public static void deleteFile(String filePath) {
 
             File file = new File(filePath);
-    
             file.delete();
     
         }
 
-        public static void deleteDirectory (String dir)
-        {
-            File file = new File (dir);
-            
+        public static void deleteDir(File file) {
+            File[] contents = file.listFiles();
+            if (contents != null) {
+                for (File f : contents) {
+                    deleteDir(f);
+                }
+            }
+            file.delete();
         }
 
 
