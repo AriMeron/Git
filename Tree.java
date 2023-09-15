@@ -3,7 +3,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Formatter;
 
 public class Tree {
    
@@ -117,7 +121,56 @@ public class Tree {
         }
 
 
+        public void writeToObjects () throws Throwable
+        {
+            //read file contents to string
+            String beforeSha = fileToString (treeFileName);
 
+            //take sha of string
+            
+            String afterSha = encryptPassword (beforeSha);
+            
+            //make fileName the sha string
+
+            //File newFile = new File ("objects", afterSha);
+            this.stringToFile (afterSha, beforeSha);
+            //write contents of the file
+            
+        }
+
+
+        public static String encryptPassword(String password)
+    {
+        String sha1 = "";
+        try
+        { 
+            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
+            crypt.reset();
+            crypt.update(password.getBytes("UTF-8"));
+            sha1 = byteToHex(crypt.digest());
+        }
+        catch(NoSuchAlgorithmException e)
+        {
+            e.printStackTrace();
+        }
+        catch(UnsupportedEncodingException e)
+        {
+            e.printStackTrace();
+        }
+        return sha1;
+    }
+
+    private static String byteToHex(final byte[] hash)
+    {
+        Formatter formatter = new Formatter();
+        for (byte b : hash)
+        {
+            formatter.format("%02x", b);
+        }
+        String result = formatter.toString();
+        formatter.close();
+        return result;
+    }
 
 
 }
