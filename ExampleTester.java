@@ -18,7 +18,8 @@ public class ExampleTester {
         File file = new File ("hello.txt");
         Git.stringToFile ("hello.txt", "test file contents");
         Git.deleteFile ("index");
-        Git.deleteDirectory ("objects");
+        File newFile = new File ("objects");
+        Git.deleteDir (newFile);
         
         
         /*
@@ -30,6 +31,7 @@ public class ExampleTester {
 
     @AfterAll
     static void tearDownAfterClass() throws Exception {
+
         /*
          * Utils.deleteFile("junit_example_file_data.txt");
          * Utils.deleteFile("index");
