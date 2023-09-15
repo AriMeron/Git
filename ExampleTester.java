@@ -1,6 +1,7 @@
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -62,11 +63,16 @@ public class ExampleTester {
     @DisplayName ("Test Tree Object")
     void testTree () throws Throwable
     {
+        File reference = new File ("reference.txt");
+        FileWriter fw = new FileWriter (reference);
+        fw.write ("tree: bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b");
         File file = new File ("treeTester.txt");
         Tree tree = new Tree ("treeTester.txt");
         tree.add ("tree", "bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b", "");
         tree.remove("bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b");
         tree.writeToObjects();
+        assertTrue (file.exists());
+        assertTrue (reference.equals (file));
 
 
     }
