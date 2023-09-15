@@ -13,12 +13,13 @@ import org.junit.jupiter.api.Test;
 
 public class ExampleTester {
 
+   private static File newFile;
     @BeforeAll
     static void setUpBeforeClass() throws Exception {
         File file = new File ("hello.txt");
         Git.stringToFile ("hello.txt", "test file contents");
         Git.deleteFile ("index");
-        File newFile = new File ("objects");
+        newFile = new File ("objects");
         Git.deleteDir (newFile);
         
         
@@ -31,7 +32,9 @@ public class ExampleTester {
 
     @AfterAll
     static void tearDownAfterClass() throws Exception {
-
+        Git.deleteFile ("hello.txt");
+        Git.deleteFile ("index");
+        Git.deleteDir (newFile);
         /*
          * Utils.deleteFile("junit_example_file_data.txt");
          * Utils.deleteFile("index");
@@ -43,6 +46,7 @@ public class ExampleTester {
     @DisplayName("[8] Test if initialize and objects are created correctly")
     void testInitialize() throws Exception {
 
+        Git.init();
         // Run the person's code
         // TestHelper.runTestSuiteMethods("testInitialize");
 
@@ -57,26 +61,28 @@ public class ExampleTester {
     @Test
     @DisplayName("[15] Test if adding a blob works.  5 for sha, 5 for file contents, 5 for correct location")
     void testCreateBlob() throws Exception {
-
+        File file;
         try {
 
             // Manually create the files and folders before the 'testAddFile'
+            file = new File ("tester.txt");
             // MyGitProject myGitClassInstance = new MyGitProject();
             // myGitClassInstance.init();
-
+            Git.init();
             // TestHelper.runTestSuiteMethods("testCreateBlob", file1.getName());
+            
 
         } catch (Exception e) {
             System.out.println("An error occurred: " + e.getMessage());
         }
 
         // Check blob exists in the objects folder
-        File file_junit1 = new File("objects/" + file1.methodToGetSha1());
+        File file_junit1 = new File("objects/" + file.methodToGetSha1());
         assertTrue("Blob file to add not found", file_junit1.exists());
 
         // Read file contents
-        String indexFileContents = MyUtilityClass.readAFileToAString("objects/" + file1.methodToGetSha1());
+        String indexFileContents = Git.fileToString("objects/" + file.methodToGetSha1());
         assertEquals("File contents of Blob don't match file contents pre-blob creation", indexFileContents,
-                file1.getContents());
+                file.getContents());
     }
 }
