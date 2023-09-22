@@ -60,7 +60,9 @@ public class Tree {
             builder.append("tree : " + hash + "\n");
         }
 
-        builder.deleteCharAt(builder.length() - 1);
+        if (builder.length() > 0) {
+            builder.deleteCharAt(builder.length() - 1);
+        }
 
         String result = builder.toString();
         String resultHash = Util.hashString(result);

@@ -26,7 +26,7 @@ public class Commit {
         return dtf.format(localDate);
     }
 
-    public String createTree() throws Exception {
+    public static String createTree() throws Exception {
         Tree tree = new Tree();
         return tree.writeToObjects();
     }
@@ -38,9 +38,7 @@ public class Commit {
         String commitHash = Util.hashString(builder.toString());
 
         // Inserting the nextCommitHash after the second newline
-        builder.insert(builder.indexOf("\n", builder.indexOf("\n")), nextCommitHash + "\n");
-
-        builder.deleteCharAt(builder.length() - 1);
+        builder.insert(builder.indexOf("\n", builder.indexOf("\n") + 1), nextCommitHash + "\n");
 
         Util.writeFile("objects/" + commitHash, builder.toString());
     }
