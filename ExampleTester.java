@@ -16,16 +16,16 @@ import org.junit.jupiter.api.Test;
 
 public class ExampleTester {
 
-   private static File newFile;
+    private static File newFile;
+
     @BeforeAll
     static void setUpBeforeClass() throws Exception {
-        File file = new File ("hello.txt");
-        Git.stringToFile ("hello.txt", "test file contents");
-        Git.deleteFile ("index");
-        newFile = new File ("objects");
-        Git.deleteDir (newFile);
-        
-        
+        File file = new File("hello.txt");
+        Git.stringToFile("hello.txt", "test file contents");
+        Git.deleteFile("index");
+        newFile = new File("objects");
+        Git.deleteDir(newFile);
+
         /*
          * Utils.writeStringToFile("junit_example_file_data.txt", "test file contents");
          * Utils.deleteFile("index");
@@ -35,9 +35,9 @@ public class ExampleTester {
 
     @AfterAll
     static void tearDownAfterClass() throws Exception {
-        Git.deleteFile ("hello.txt");
-        Git.deleteFile ("index");
-        Git.deleteDir (newFile);
+        Git.deleteFile("hello.txt");
+        Git.deleteFile("index");
+        Git.deleteDir(newFile);
         /*
          * Utils.deleteFile("junit_example_file_data.txt");
          * Utils.deleteFile("index");
@@ -62,51 +62,43 @@ public class ExampleTester {
     }
 
     @Test
-    @DisplayName ("Test Tree Object")
-    void testTree () throws Throwable
-    {
-        File reference = new File ("reference.txt");
-        FileWriter fw = new FileWriter (reference);
-        fw.write ("tree: bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b");
-        String sha = fileToString ("reference.txt");
-        File file = new File ("treeTester.txt");
-        Tree tree = new Tree ("treeTester.txt");
-        tree.add ("tree", "bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b", "");
+    @DisplayName("Test Tree Object")
+    void testTree() throws Throwable {
+        File reference = new File("reference.txt");
+        FileWriter fw = new FileWriter(reference);
+        fw.write("tree: bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b");
+        String sha = fileToString("reference.txt");
+        File file = new File("treeTester.txt");
+        Tree tree = new Tree("treeTester.txt");
+        tree.add("tree", "bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b", "");
         tree.remove("bd1ccec139dead5ee0d8c3a0499b42a7d43ac44b");
         tree.writeToObjects();
-        assertTrue (tree.getName().equals (sha));
-        //how do i check that its in the directory "objects"
-
+        assertTrue(tree.getName().equals(sha));
+        // how do i check that its in the directory "objects"
 
     }
 
-     public String fileToString (String fileName) throws Throwable
-        {
-            String endResult = "";
-            //File file = new File ("output.txt");
-            char ch;
- 
-             // check if File exists or not
-            FileReader fr;
-            try
-            {
-                fr = new FileReader(fileName);
-                while(fr.ready())
-                {
-                    ch = (char) fr.read();
-                    endResult += ch;
-                }
- 
-                fr.close();
-            } catch (Error | IOException e)
-            {
-                
-                throw e;
+    public String fileToString(String fileName) throws Throwable {
+        String endResult = "";
+        // File file = new File ("output.txt");
+        char ch;
+
+        // check if File exists or not
+        FileReader fr;
+        try {
+            fr = new FileReader(fileName);
+            while (fr.ready()) {
+                ch = (char) fr.read();
+                endResult += ch;
             }
-            return endResult;
+
+            fr.close();
+        } catch (Error | IOException e) {
+
+            throw e;
         }
-
-
+        return endResult;
+    }
 
     @Test
     @DisplayName("[15] Test if adding a blob works.  5 for sha, 5 for file contents, 5 for correct location")
@@ -115,15 +107,14 @@ public class ExampleTester {
         try {
 
             // Manually create the files and folders before the 'testAddFile'
-            file = new File ("tester.txt");
+            file = new File("tester.txt");
             // MyGitProject myGitClassInstance = new MyGitProject();
             // myGitClassInstance.init();
             Git.init();
-            
-            //how do i test that the blob is created????
+
+            // how do i test that the blob is created????
 
             // TestHelper.runTestSuiteMethods("testCreateBlob", file1.getName());
-            
 
         } catch (Exception e) {
             System.out.println("An error occurred: " + e.getMessage());
@@ -135,8 +126,10 @@ public class ExampleTester {
         // assertTrue("Blob file to add not found", file_junit1.exists());
 
         // // Read file contents
-        // String indexFileContents = Git.fileToString("objects/" + file.methodToGetSha1());
-        // assertEquals("File contents of Blob don't match file contents pre-blob creation", indexFileContents,
-        //         file.getContents());
+        // String indexFileContents = Git.fileToString("objects/" +
+        // file.methodToGetSha1());
+        // assertEquals("File contents of Blob don't match file contents pre-blob
+        // creation", indexFileContents,
+        // file.getContents());
     }
 }

@@ -10,23 +10,22 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-
 public class Git {
 
     private static StringBuilder index;
-    
+
     public static void init() {
         File f = new File("objects");
-        if(!f.exists())
+        if (!f.exists())
             f.mkdirs();
         index = new StringBuilder("");
     }
-    
-    public static void blob (String filename) throws IOException, NoSuchAlgorithmException {
+
+    public static void blob(String filename) throws IOException, NoSuchAlgorithmException {
         BufferedReader br = new BufferedReader(new FileReader(filename));
         StringBuilder fileContent = new StringBuilder();
 
-        while(br.ready()) {
+        while (br.ready()) {
             fileContent.append((char) br.read());
         }
         String sha1 = generateSha1(fileContent);
@@ -56,33 +55,32 @@ public class Git {
 
     public static String byteArrayToHexString(byte[] b) {
         String result = "";
-        for (int i=0; i < b.length; i++) {
-          result +=
-                Integer.toString( ( b[i] & 0xff ) + 0x100, 16).substring( 1 );
+        for (int i = 0; i < b.length; i++) {
+            result += Integer.toString((b[i] & 0xff) + 0x100, 16).substring(1);
         }
         return result;
     }
 
-    public static void remove (String filename) throws IOException {
+    public static void remove(String filename) throws IOException {
         BufferedReader brIndex = new BufferedReader(new FileReader("index"));
         StringBuilder index2 = new StringBuilder();
         int occurences = 0;
         String shaName = "";
 
-        //records all of the files
-        while(brIndex.ready()) {
+        // records all of the files
+        while (brIndex.ready()) {
             String str = brIndex.readLine();
-            if(str.substring(0, filename.length()).equals(filename)) {
+            if (str.substring(0, filename.length()).equals(filename)) {
                 occurences++;
                 shaName = str.substring(str.indexOf(':') + 1);
-            }
-            else {
+            } else {
                 index2.append(str + "\n");
             }
         }
-            
-        if(occurences == 0) {}
-        if(occurences == 1) {
+
+        if (occurences == 0) {
+        }
+        if (occurences == 1) {
             Path path = Paths.get("objects/" + shaName);
             Files.delete(path);
             PrintWriter pw = new PrintWriter("index");
@@ -92,49 +90,42 @@ public class Git {
         brIndex.close();
     }
 
-    public static void stringToFile (String string, String fileName) throws IOException
-        {
-            // attach a file to FileWriter
-            File file = new File ("objects/" + string);
-            file.createNewFile();
-            FileWriter fw= new FileWriter(file);
-            FileReader fr = new FileReader (fileName);
+    public static void stringToFile(String string, String fileName) throws IOException {
+        // attach a file to FileWriter
+        File file = new File("objects/" + string);
+        file.createNewFile();
+        FileWriter fw = new FileWriter(file);
+        FileReader fr = new FileReader(fileName);
 
-            char ch;
-            String endResult = "";
-            while(fr.ready())
-                {
-                    ch = (char) fr.read();
-                    endResult += ch;
-                }
-
-
-                fw.write(endResult);
-     
-            //close the file
-            fw.close();
-            fr.close();
+        char ch;
+        String endResult = "";
+        while (fr.ready()) {
+            ch = (char) fr.read();
+            endResult += ch;
         }
 
-        public static void deleteFile(String filePath) {
+        fw.write(endResult);
 
-            File file = new File(filePath);
-            file.delete();
-    
-        }
+        // close the file
+        fw.close();
+        fr.close();
+    }
 
-        public static void deleteDir(File file) {
-            File[] contents = file.listFiles();
-            if (contents != null) {
-                for (File f : contents) {
-                    deleteDir(f);
-                }
+    public static void deleteFile(String filePath) {
+
+        File file = new File(filePath);
+        file.delete();
+
+    }
+
+    public static void deleteDir(File file) {
+        File[] contents = file.listFiles();
+        if (contents != null) {
+            for (File f : contents) {
+                deleteDir(f);
             }
-            file.delete();
         }
-
-
-
-
+        file.delete();
+    }
 
 }
