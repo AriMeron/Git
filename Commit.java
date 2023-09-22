@@ -30,4 +30,18 @@ public class Commit {
         Tree tree = new Tree();
         return tree.writeToObjects();
     }
+
+    public void writeToObjects() throws Exception {
+        StringBuilder builder = new StringBuilder(
+                treeHash + "\n" + previousCommitHash + "\n" + author + "\n" + date + "\n" + summary);
+
+        String commitHash = Util.hashString(builder.toString());
+
+        // Inserting the nextCommitHash after the second newline
+        builder.insert(builder.indexOf("\n", builder.indexOf("\n")), nextCommitHash + "\n");
+
+        builder.deleteCharAt(builder.length() - 1);
+
+        Util.writeFile("objects/" + commitHash, builder.toString());
+    }
 }
