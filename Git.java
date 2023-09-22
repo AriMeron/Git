@@ -14,10 +14,16 @@ public class Git {
 
     private static StringBuilder index;
 
-    public static void init() {
-        File f = new File("objects");
-        if (!f.exists())
-            f.mkdirs();
+    public static void init() throws IOException {
+        File objectsFolder = new File("objects");
+        if (!objectsFolder.exists())
+            objectsFolder.mkdirs();
+
+        Path indexFile = Paths.get("index");
+        if (!Files.exists(indexFile)) {
+            Files.createFile(indexFile);
+        }
+
         index = new StringBuilder("");
     }
 
