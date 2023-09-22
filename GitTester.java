@@ -2,7 +2,7 @@ import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
 
-public class GitTest {
+public class GitTester {
     @Test
     void testAddToIndex() throws IOException {
         Git.addToIndex("testCompare", "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d");
