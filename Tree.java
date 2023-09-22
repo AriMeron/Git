@@ -49,7 +49,7 @@ public class Tree {
         return false;
     }
 
-    public void writeToObjects() throws Exception {
+    public String writeToObjects() throws Exception {
         StringBuilder builder = new StringBuilder();
 
         for (Map.Entry<String, String> entry : blobs.entrySet()) {
@@ -63,8 +63,11 @@ public class Tree {
         builder.deleteCharAt(builder.length() - 1);
 
         String result = builder.toString();
-        System.out.println(result);
-        Util.writeFile("objects/" + Util.hashString(result), result);
+        String resultHash = Util.hashString(result);
+        Util.writeFile("objects/" + resultHash, result);
+
+        // Returns the hash of the tree so it can be accessed after writing
+        return resultHash;
     }
 
 }
