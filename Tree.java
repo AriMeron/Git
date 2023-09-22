@@ -1,136 +1,70 @@
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Formatter;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 public class Tree {
 
-    private File file;
-    private ArrayList trees;
-    private ArrayList names;
-    private String treeFileName;
+    private HashSet<String> trees;
+    private HashMap<String, String> blobs;
 
-    public Tree(String fileName) {
-        file = new File(fileName);
-        names = new ArrayList<String>();
-        trees = new ArrayList<String>();
-        treeFileName = fileName;
+    public Tree() {
+        blobs = new HashMap<String, String>();
+        trees = new HashSet<String>();
     }
 
-    public void add(String typeOfFile, String shaOfFile, String optionalFileName) throws IOException {
-        BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
-        if (!names.contains(optionalFileName)) {
-            if (optionalFileName.length() > 0) {
-                names.add(optionalFileName);
-                bw.write("" + typeOfFile + " : " + shaOfFile + " : " + optionalFileName + "\n");
-            } else {
-                if (!trees.contains(shaOfFile)) {
-                    trees.add(shaOfFile);
+    public void add(String input) throws Exception {
+        String[] splits = input.split(" : ");
+
+        if (splits.length == 2) {
+            // Adding a tree
+            if (splits[0].equals("tree")) {
+                if (trees.contains(splits[1])) {
+                    throw new Exception("Cannot add a duplicate tree");
                 }
-                bw.write("" + typeOfFile + " : " + shaOfFile + "\n");
+                trees.add(splits[1]);
+                return;
+            }
+        } else if (splits.length == 3) {
+            // Adding a blob
+            if (splits[0].equals("blob")) {
+                if (blobs.containsKey(splits[2])) {
+                    throw new Exception("Cannot add a blob with a duplicate filename");
+                }
+                blobs.put(splits[2], splits[1]);
+                return;
             }
         }
-        bw.close();
+
+        throw new Exception("Invalid add format");
     }
 
-    public void remove(String string) throws Throwable {
-        int index;
-        String theFile = fileToString(treeFileName);
-        index = theFile.indexOf(string);
-        int length;
-        String endString;
-
-        if (string.contains(".txt")) {
-            length = 50;
-            endString = string.substring(0, index - length) + string.substring(index + string.length() + 1);
-            stringToFile(endString, treeFileName);
-        } else {
-            length = 7;
-            endString = string.substring(0, index - length) + string.substring(index + string.length() + 1);
-            stringToFile(endString, treeFileName);
-
+    public boolean remove(String key) {
+        if (blobs.containsKey(key)) {
+            blobs.remove(key);
+            return true;
+        } else if (trees.contains(key)) {
+            trees.remove(key);
+            return true;
         }
+        return false;
     }
 
-    public void stringToFile(String fileName, String string) throws IOException {
-        // attach a file to FileWriter
-        File file = new File("objects/" + fileName);
-        file.createNewFile();
-        BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
+    public void writeToObjects() throws Exception {
+        StringBuilder builder = new StringBuilder();
 
-        bw.write(string);
-
-        // close the file
-        bw.close();
-    }
-
-    public String fileToString(String fileName) throws Throwable {
-        String endResult = "";
-        // File file = new File ("output.txt");
-        char ch;
-
-        // check if File exists or not
-        FileReader fr;
-        try {
-            fr = new FileReader(fileName);
-            while (fr.ready()) {
-                ch = (char) fr.read();
-                endResult += ch;
-            }
-
-            fr.close();
-        } catch (Error | IOException e) {
-
-            throw e;
+        for (Map.Entry<String, String> entry : blobs.entrySet()) {
+            builder.append("blob : " + entry.getValue() + " : " + entry.getKey() + "\n");
         }
-        return endResult;
-    }
 
-    public void writeToObjects() throws Throwable {
-        // read file contents to string
-        String beforeSha = fileToString(treeFileName);
-
-        // take sha of string
-
-        String afterSha = encryptPassword(beforeSha);
-
-        // make fileName the sha string
-
-        // File newFile = new File ("objects", afterSha);
-        this.stringToFile(afterSha, beforeSha);
-        // write contents of the file
-
-    }
-
-    public static String encryptPassword(String password) {
-        String sha1 = "";
-        try {
-            MessageDigest crypt = MessageDigest.getInstance("SHA-1");
-            crypt.reset();
-            crypt.update(password.getBytes("UTF-8"));
-            sha1 = byteToHex(crypt.digest());
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        for (String hash : trees.toArray(new String[trees.size()])) {
+            builder.append("tree : " + hash + "\n");
         }
-        return sha1;
-    }
 
-    private static String byteToHex(final byte[] hash) {
-        Formatter formatter = new Formatter();
-        for (byte b : hash) {
-            formatter.format("%02x", b);
-        }
-        String result = formatter.toString();
-        formatter.close();
-        return result;
+        builder.deleteCharAt(builder.length() - 1);
+
+        String result = builder.toString();
+        System.out.println(result);
+        Util.writeFile("objects/" + Util.hashString(result), result);
     }
 
 }
