@@ -1,6 +1,7 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.jupiter.api.DisplayName;
@@ -88,5 +89,82 @@ public class GitTester {
 
         Util.deleteDirectory("objects");
         Util.deleteFile("index");
+    }
+
+    @Test
+    void testAddDirectory1() throws Exception {
+        Tree tree = new Tree();
+        Git git = new Git();
+
+        File file = new File("folder");
+        file.mkdirs();
+
+        File test1 = new File("folder/test1");
+        Util.writeFile("folder/test1", "test1");
+        String hash1 = git.generateSha1("test1");
+        tree.add("blob : " + hash1 + " : test1");
+
+
+        File test2 = new File("folder/test2");
+        Util.writeFile("folder/test2", "test2");
+        String hash2 = git.generateSha1("test2");
+        tree.add("blob : " + hash2 + " : test2");
+
+        File test3 = new File("folder/test3");
+        Util.writeFile("folder/test3", "test3");
+        String hash3 = git.generateSha1("test3");
+        tree.add("blob : " + hash3 + " : test3");
+
+        git.addDirectory("folder");
+
+        assertTrue(Util.exists("objects/" + hash1));
+        assertTrue(Util.exists("objects/" + hash2));
+        assertTrue(Util.exists("objects/" + hash3));
+
+        assertTrue(Util.exists("objects/" + tree.writeToObjects()));
+    }
+
+    @Test
+    void testAddDirectory2() throws Exception {
+        Tree tree = new Tree();
+        Git git = new Git();
+
+        File folder = new File("folder");
+        folder.mkdirs();
+
+        File folder2 = new File("folder/folder2");
+        folder2.mkdirs();
+
+        File folder3 = new File("folder/folder3");
+        folder3.mkdirs();
+
+        File test1 = new File("folder/test1");
+        Util.writeFile("folder/test1", "test1");
+        String hash1 = git.generateSha1("test1");
+        tree.add("blob : " + hash1 + " : test1");
+
+        File test2 = new File("folder/folder2/test2");
+        Util.writeFile("folder/foler2/test2", "test2");
+        String hash2 = git.generateSha1("test2");
+        tree.add("blob : " + hash2 + " : test2");
+        Tree tree2 = new Tree();
+        tree2.add("blob : " + hash2 + " : test2");
+
+        File test3 = new File("folder/folder3/test3");
+        Util.writeFile("folder/folder3/test3", "test3");
+        String hash3 = git.generateSha1("test3");
+        tree.add("blob : " + hash3 + " : test3");
+        Tree tree3 = new Tree();
+        tree3.add("blob : " + hash3 + " : test3");
+
+        git.addDirectory("folder");
+
+        assertTrue(Util.exists("objects/" + hash1));
+        assertTrue(Util.exists("objects/" + hash2));
+        assertTrue(Util.exists("objects/" + hash3));
+
+        assertTrue(Util.exists("objects/" + tree2.writeToObjects()));
+        assertTrue(Util.exists("objects/" + tree3.writeToObjects()));
+        assertTrue(Util.exists("objects/" + tree.writeToObjects()));
     }
 }

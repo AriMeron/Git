@@ -107,17 +107,26 @@ public class Git {
         File[] fileList = directory.listFiles();
         Tree tree = new Tree();
         StringBuilder sb = new StringBuilder();
+        if(fileList.length == 0) {
+            tree.add("tree : e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+        }
 
         for(File f : fileList) {
             if(f.isDirectory()) {
                 addDirectory(folderName + "/" + f.getName());
                 Tree tree2 = new Tree();
                 File[] list = f.listFiles();
-                for(File file : list) {
-                    tree2.add("blob : " + generateHash(file) + " : " + file.getName());
+                if(list != null) {
+                    for(File file : list) {
+                        tree2.add("blob : " + generateHash(file) + " : " + file.getName());
+                    }
+                    sb.append("tree : " + tree2.writeToObjects() + '\n');
+                    tree.add(sb.toString());
                 }
-                sb.append("tree : " + tree2.writeToObjects() + '\n');
-                tree.add(sb.toString());
+                else{
+                    tree2.add("");
+                    tree.add("tree : " + tree2.writeToObjects());
+                }
 
             }
             else {
