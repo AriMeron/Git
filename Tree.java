@@ -1,3 +1,4 @@
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -16,7 +17,7 @@ public class Tree {
         String[] splits = input.split(" : ");
 
         if (splits.length == 2) {
-            // Adding a tree
+            // Adding a commit's tree
             if (splits[0].equals("tree")) {
                 if (trees.contains(splits[1])) {
                     throw new Exception("Cannot add a duplicate tree");

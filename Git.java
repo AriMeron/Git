@@ -1,11 +1,9 @@
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,7 +31,7 @@ public class Git {
         index = new StringBuilder("");
     }
 
-    public void blob(String filename) throws IOException, NoSuchAlgorithmException {
+    public void blob(String filename) throws Exception {
         BufferedReader br = new BufferedReader(new FileReader(filename));
         StringBuilder fileContent = new StringBuilder();
 
@@ -46,7 +44,7 @@ public class Git {
         pw.print(fileContent);
 
         index.append(filename + " : " + sha1 + "\n");
-        addToIndex();
+        addToIndex(filename, sha1);
 
         pw.close();
         br.close();
@@ -58,10 +56,23 @@ public class Git {
         return byteArrayToHexString(ret);
     }
 
-    public void addToIndex() throws IOException {
-        PrintWriter pw = new PrintWriter("index");
-        pw.print(index.toString().substring(0, index.length() - 1));
-        pw.close();
+    public void addToIndex(String filename, String sha1String) throws Exception {
+        File f = new File(filename);
+        String s = Util.readFile("index");
+        FileWriter fw = new FileWriter("index", true);
+        if(f.isDirectory()) {
+            if(s.length() != 0)
+                fw.write("\ntree : " + sha1String + " : " + filename );
+            else
+                fw.write("tree : " + sha1String + " : " + filename);
+        }
+        else {
+            if(s.length() != 0)
+                fw.write("\nblob : " + sha1String + " : " + filename);
+            else
+            fw.write("blob : " + sha1String + " : " + filename); 
+        }
+        fw.close();
     }
 
     public String byteArrayToHexString(byte[] b) {
@@ -127,7 +138,6 @@ public class Git {
                     tree2.add("");
                     tree.add("tree : " + tree2.writeToObjects());
                 }
-
             }
             else {
                 String name = f.getName();
@@ -145,9 +155,10 @@ public class Git {
                 tree.add(sb2.toString());
             }
         }
-        tree.writeToObjects();
-        removeNewLine("objects/" + tree.writeToObjects());
-        return(tree.writeToObjects());
+        String s = tree.writeToObjects();
+        removeNewLine("objects/" + s);
+        addToIndex(folderName, s);
+        return(s);
     }
 
     public String generateHash(File f) throws IOException, NoSuchAlgorithmException {

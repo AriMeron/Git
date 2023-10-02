@@ -1,6 +1,8 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.time.format.DateTimeFormatter;
 
 import org.junit.jupiter.api.DisplayName;
@@ -19,7 +21,13 @@ public class CommitTester {
     @Test
     @DisplayName("Verify createTree creates a Tree in the correct location")
     void testCreateTree() throws Exception {
-        String treeHash = Commit.createTree();
+        Util.deleteFile("index");
+        Git git = new Git();
+        git.addToIndex("test1", "2f3c6b82e94acbefbdcc4ac1d00fcfb416892355");
+        git.addToIndex("test2", "ccf587c77d3c946812e21674ed3b95cb47ab0d6d");
+
+        Commit commit = new Commit("new commit", "Ari Meron");
+        String treeHash = commit.createTree();
 
         // Confirm the empty tree has the correct hash
         assertEquals(treeHash, "da39a3ee5e6b4b0d3255bfef95601890afd80709");
@@ -66,5 +74,33 @@ public class CommitTester {
                 "Buddy the Wolverine\n" +
                 "2023/09/21\n" +
                 "Did incredible things.", Util.readFile("objects/9d96fd1cc654fad2ee8951db7bb356091a63c4d1"));
+    }
+
+    @Test
+    void testCommitAdvanced1() throws Exception {
+        Git git = new Git();
+        git.addToIndex("test1", "2f3c6b82e94acbefbdcc4ac1d00fcfb416892355");
+        git.addToIndex("test2", "ccf587c77d3c946812e21674ed3b95cb47ab0d6d");
+
+        Commit commit1 = new Commit("Commit", "Ari Meron");
+        Commit commit2 = new Commit(commit1.writeToObjects(), "Commit2", "Ari Meron");
+
+        Tree tree1 = new Tree();
+        tree1.add("blob : 2f3c6b82e94acbefbdcc4ac1d00fcfb416892355 : test1");
+        tree1.add("blob : ccf587c77d3c946812e21674ed3b95cb47ab0d6d : test2");
+        String treeHash1 = tree1.writeToObjects();
+
+
+
+        BufferedReader br = new BufferedReader(new FileReader(commit1.writeToObjects()));
+        String commitTree = (String) br.readLine();
+        String prevCommit = (String) br.readLine();
+        String nextCommit = (String) br.readLine();
+        String c2 = commit2.writeToObjects();
+        br.close();
+
+        assertEquals(commitTree, treeHash1);
+        assertEquals(prevCommit, "");
+        assertEquals(nextCommit, c2);
     }
 }
