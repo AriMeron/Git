@@ -63,6 +63,18 @@ public class Commit {
         return commitHash;
     }
 
+    public String getHash() throws NoSuchAlgorithmException {
+        StringBuilder builder = new StringBuilder(
+        treeHash + "\n" + previousCommitHash + "\n" + author + "\n" + date + "\n" + summary);
+
+        String commitHash = Util.hashString(builder.toString());
+
+        // Inserting the nextCommitHash after the second newline
+        builder.insert(builder.indexOf("\n", builder.indexOf("\n") + 1), nextCommitHash + "\n");
+
+        return commitHash;
+    }
+
     public static void clearIndex() throws IOException {
         Path p = Paths.get("index");
         Files.delete(p);
@@ -74,28 +86,31 @@ public class Commit {
     public String getPrevTree() throws IOException {
         if(previousCommitHash.equals(""))
             return "";
-        BufferedReader br = new BufferedReader(new FileReader(previousCommitHash));
+        BufferedReader br = new BufferedReader(new FileReader("objects/" + previousCommitHash));
         return (String) br.readLine();
     }
 
-    public void editPrevCommit() throws IOException, NoSuchAlgorithmException {
+    public void editPrevCommit() throws Exception {
         if(!previousCommitHash.equals("")) {
+            
             StringBuilder sb = new StringBuilder();
-            BufferedReader br = new BufferedReader(new FileReader(previousCommitHash));
-            PrintWriter pw = new PrintWriter(previousCommitHash);
+            BufferedReader br = new BufferedReader(new FileReader("objects/" + previousCommitHash));
             int i = 0;
+            Boolean ready = br.ready();
             while(br.ready()) {
                 if(i == 2) {
-                    StringBuilder builder = new StringBuilder(
-                        treeHash + "\n" + previousCommitHash + "\n" + author + "\n" + date + "\n" + summary);
-        
-                    String commitHash = Util.hashString(builder.toString());
-                    sb.append(commitHash);
+                    br.readLine();
+                    String w = getHash();
+                    sb.append(w + '\n');
                 }
                 else
-                    sb.append((String) br.readLine());
+                    sb.append((String) br.readLine() + '\n');
                 i++;
             }
+            String builder = sb.toString();
+            System.out.println(builder);
+            Util.deleteFile("objects/" + previousCommitHash);
+            PrintWriter pw = new PrintWriter("objects/" + previousCommitHash);
             pw.print(sb.toString());
             pw.close();
             br.close();

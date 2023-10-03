@@ -83,21 +83,19 @@ public class CommitTester {
         git.addToIndex("test2", "ccf587c77d3c946812e21674ed3b95cb47ab0d6d");
 
         Commit commit1 = new Commit("Commit", "Ari Meron");
-        Commit commit2 = new Commit(commit1.writeToObjects(), "Commit2", "Ari Meron");
+        Commit commit2 = new Commit(commit1.getHash(), "Commit2", "Ari Meron");
 
         Tree tree1 = new Tree();
         tree1.add("blob : 2f3c6b82e94acbefbdcc4ac1d00fcfb416892355 : test1");
         tree1.add("blob : ccf587c77d3c946812e21674ed3b95cb47ab0d6d : test2");
-        String treeHash1 = tree1.writeToObjects();
+        String treeHash1 = tree1.getHash();
 
-
-
-        BufferedReader br = new BufferedReader(new FileReader(commit1.writeToObjects()));
-        String commitTree = (String) br.readLine();
-        String prevCommit = (String) br.readLine();
-        String nextCommit = (String) br.readLine();
-        String c2 = commit2.writeToObjects();
-        br.close();
+        String contents1 = Util.readFile("objects/17134b84db732a9cfdebab9e3955ce453a8e4bab");
+        String splits[] = contents1.split("\n");
+        String commitTree = splits[0];
+        String prevCommit = splits[1];
+        String nextCommit = splits[2];
+        String c2 = commit2.getHash();
 
         assertEquals(commitTree, treeHash1);
         assertEquals(prevCommit, "");

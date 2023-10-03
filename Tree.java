@@ -1,4 +1,5 @@
 import java.io.FileWriter;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -71,6 +72,28 @@ public class Tree {
 
         // Returns the hash of the tree so it can be accessed after writing
         return resultHash;
+    }
+
+    public String getHash() throws NoSuchAlgorithmException {
+        StringBuilder builder = new StringBuilder();
+
+        for (Map.Entry<String, String> entry : blobs.entrySet()) {
+            builder.append("blob : " + entry.getValue() + " : " + entry.getKey() + "\n");
+        }
+
+        for (String hash : trees.toArray(new String[trees.size()])) {
+            builder.append("tree : " + hash + "\n");
+        }
+
+        if (builder.length() > 0) {
+            builder.deleteCharAt(builder.length() - 1);
+        }
+
+        String result = builder.toString();
+        String resultHash = Util.hashString(result);
+
+        // Returns the hash of the tree so it can be accessed after writing
+        return resultHash;   
     }
 
 }
