@@ -1,6 +1,8 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -26,6 +28,7 @@ public class Commit {
         this.date = getDate();
 
         editPrevCommit();
+        writeToObjects();
     }
 
     public Commit(String summary, String author) throws Exception {
@@ -38,16 +41,19 @@ public class Commit {
     }
 
     public String createTree() throws Exception {
-        Tree tree = new Tree();
+        String tree = "";
         BufferedReader br = new BufferedReader(new FileReader("index"));
         while(br.ready()) {
             String line = (String) br.readLine();
-            tree.add(line);
+            tree += line + '\n';
         }
         if (!previousCommitHash.equals(""))
-            tree.add("tree : " + getPrevTree());
+            tree += "tree : " + getPrevTree();
         clearIndex();
-        return tree.writeToObjects();
+        tree = tree.substring(0, tree.length()-1);
+        String hash = Util.hashString(tree);
+        Util.writeFile("objects/" + hash, tree);
+        return hash;
     }
 
     public String writeToObjects() throws Exception {
@@ -116,4 +122,52 @@ public class Commit {
             br.close();
         }
     }
+
+    public String delete(String fileName) throws NoSuchAlgorithmException, IOException {
+        String newTree = "";
+        String currTree = treeHash;
+        File f = new File(fileName);
+        if(!f.exists())
+            return Util.hashString(newTree);
+        while(currTree != null) {
+            Boolean contains = false;
+            BufferedReader br = new BufferedReader(new FileReader("objects/" + currTree));
+            while(br.ready()) {
+                String line = br.readLine();
+                String[] splits = line.split(" : ");
+                if(splits.length == 3) {
+                    if(!splits[2].equals(fileName))
+                        newTree += line + '\n';
+                    else
+                        contains = true;
+                }
+            }
+            currTree = getPrevTree(currTree);
+            if(contains)
+                break;
+        }
+        newTree += "tree : " + currTree;
+
+        String contents = Util.readFile(fileName);
+        String hash = Util.hashString(contents);
+        Util.deleteFile("objects/" + hash);
+
+        FileWriter fw = new FileWriter("index", true);
+        fw.write("*deleted*" + fileName);
+        fw.close();
+        return Util.hashString(newTree);
+    }
+
+
+    public String getPrevTree(String currTree) throws IOException {
+
+        String contents = Util.readFile("objects/" + currTree);
+        String[] splits = contents.split("\n");
+        String line = splits[splits.length-1];
+        String[] splitLine = line.split(" : ");
+        if(!splitLine[0].equals("tree"))
+            return null;
+        else
+            return splitLine[1];
+    }    
 }

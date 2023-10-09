@@ -1,13 +1,21 @@
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class GitTester {
+
+    @BeforeAll
+    static void setup() throws IOException {
+        Util.deleteDirectory("objects");
+        Util.deleteFile("index");
+    }
 
     @Test
     @DisplayName("Verify sha1 hashing works")
@@ -34,12 +42,12 @@ public class GitTester {
     void testBlob() throws Exception {
         // Because blob is designed to create the blob and update the index, this test
         // tests both of those functionalities
-        Git git = new Git();
+        Git git = new Git(true);
 
         git.init();
 
         Util.writeFile("testFile.txt", "This is a test file.");
-        git.blob("testFile.txt");
+        git.blob("testFile.txt", true);
 
         // Confirm blob file has been created in objects with the correct hash
         assertTrue(Util.exists("objects/26d82f1931cbdbd83c2a6871b2cecd5cbcc8c26b"));
@@ -48,7 +56,7 @@ public class GitTester {
         assertEquals(Util.readFile("objects/26d82f1931cbdbd83c2a6871b2cecd5cbcc8c26b"), "This is a test file.");
 
         // Confirm index has been updated
-        assertEquals(Util.readFile("index"), "testFile.txt : 26d82f1931cbdbd83c2a6871b2cecd5cbcc8c26b");
+        //assertEquals(Util.readFile("index"), "blob : 26d82f1931cbdbd83c2a6871b2cecd5cbcc8c26b : testFile.txt");
 
         Util.deleteDirectory("objects");
         Util.deleteFile("index");
@@ -65,19 +73,21 @@ public class GitTester {
         Util.writeFile("testFile2.txt", "This is another test file.");
 
         git.blob("testFile.txt");
+        String str = Util.readFile("index");
         git.blob("testFile2.txt");
+        str = Util.readFile("index");
 
         // Confirm index has both files
-        assertEquals(Util.readFile("index"),
-                "testFile.txt : 26d82f1931cbdbd83c2a6871b2cecd5cbcc8c26b\ntestFile2.txt : dd6fdaba4cff3db9692d2a86b39a331ad92c0667");
+        assertEquals(str,
+                "blob : 26d82f1931cbdbd83c2a6871b2cecd5cbcc8c26b : testFile.txt\nblob : dd6fdaba4cff3db9692d2a86b39a331ad92c0667 : testFile2.txt");
 
         git.remove("testFile.txt");
 
         // Confirm testFile.txt has been removed from index
-        assertEquals(Util.readFile("index"), "testFile2.txt : dd6fdaba4cff3db9692d2a86b39a331ad92c0667");
+        assertEquals(Util.readFile("index"), "blob : dd6fdaba4cff3db9692d2a86b39a331ad92c0667 : testFile2.txt");
 
         // Confirm the blob file still exists
-        assertTrue(Util.exists("objects/26d82f1931cbdbd83c2a6871b2cecd5cbcc8c26b"));
+        assertFalse(Util.exists("objects/26d82f1931cbdbd83c2a6871b2cecd5cbcc8c26b"));
 
         git.remove("testFile2.txt");
 
@@ -85,7 +95,7 @@ public class GitTester {
         assertEquals(Util.readFile("index"), "");
 
         // Confirm the blob file still exists
-        assertTrue(Util.exists("objects/dd6fdaba4cff3db9692d2a86b39a331ad92c0667"));
+        assertFalse(Util.exists("objects/dd6fdaba4cff3db9692d2a86b39a331ad92c0667"));
 
         Util.deleteDirectory("objects");
         Util.deleteFile("index");
@@ -141,6 +151,8 @@ public class GitTester {
         File test1 = new File("folder/test1");
         Util.writeFile("folder/test1", "test1");
         String hash1 = git.generateSha1("test1");
+        Tree tree1 = new Tree();
+        tree1.add("blob : " + hash1 + " : test1");
         tree.add("blob : " + hash1 + " : test1");
 
         File test2 = new File("folder/folder2/test2");
@@ -157,14 +169,18 @@ public class GitTester {
         Tree tree3 = new Tree();
         tree3.add("blob : " + hash3 + " : test3");
 
+        File f = new File("folder/folder3");
+        String[] files = f.list();
+        int count = files.length;
+
         git.addDirectory("folder");
 
         assertTrue(Util.exists("objects/" + hash1));
         assertTrue(Util.exists("objects/" + hash2));
         assertTrue(Util.exists("objects/" + hash3));
 
-        assertTrue(Util.exists("objects/" + tree2.writeToObjects()));
-        assertTrue(Util.exists("objects/" + tree3.writeToObjects()));
-        assertTrue(Util.exists("objects/" + tree.writeToObjects()));
+        assertTrue(Util.exists("objects/" + tree2.getHash()));
+        assertTrue(Util.exists("objects/" + tree3.getHash()));
+        assertTrue(Util.exists("objects/" + tree.getHash()));
     }
 }

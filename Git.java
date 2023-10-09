@@ -18,6 +18,13 @@ public class Git {
         init();
     }
 
+
+    public Git(boolean bypassInit) throws IOException {
+        if(!bypassInit)
+            init();
+    }
+
+
     public void init() throws IOException {
         File objectsFolder = new File("objects");
         if (!objectsFolder.exists())
@@ -48,6 +55,28 @@ public class Git {
 
         pw.close();
         br.close();
+    }
+
+    public String blob(String filename, boolean bypassAddToIndex) throws Exception {
+        BufferedReader br = new BufferedReader(new FileReader(filename));
+        StringBuilder fileContent = new StringBuilder();
+
+        while (br.ready()) {
+            fileContent.append((char) br.read());
+        }
+        String sha1 = generateSha1(fileContent.toString());
+
+        PrintWriter pw = new PrintWriter("objects/" + sha1);
+        pw.print(fileContent);
+        if(!bypassAddToIndex) {
+            index.append(filename + " : " + sha1 + "\n");
+            addToIndex(filename, sha1);
+        }
+
+        pw.close();
+        br.close();
+
+        return sha1;
     }
 
     public String generateSha1(String fileContent) throws NoSuchAlgorithmException {
@@ -87,17 +116,20 @@ public class Git {
         BufferedReader brIndex = new BufferedReader(new FileReader("index"));
         StringBuilder index2 = new StringBuilder();
         boolean removedItem = false;
+        String hash = "";
 
         // Loops through all the files, adds to index2 if not equal to the filename
         // which is being removed
         while (brIndex.ready()) {
             String str = brIndex.readLine();
+            String[] splits = str.split(" : ");
 
             // This is terrible but should work in most cases. Needs to check for filename
             // followed by " : " in case another file contains the filename within it's
             // name.
-            if (str.contains(filename + " : ")) {
+            if (splits[2].equals(filename)) {
                 removedItem = true;
+                hash = splits[1];
             } else {
                 index2.append(str + "\n");
             }
@@ -108,6 +140,8 @@ public class Git {
             PrintWriter pw = new PrintWriter("index");
             pw.print(index2.toString().substring(0, Math.max(index2.length() - 1, 0)));
             pw.close();
+            Path p = Paths.get("objects/" + hash);
+            Files.delete(p);
         }
 
         brIndex.close();
@@ -116,50 +150,32 @@ public class Git {
     public String addDirectory(String folderName) throws Exception {
         File directory = new File(folderName);
         File[] fileList = directory.listFiles();
-        Tree tree = new Tree();
-        StringBuilder sb = new StringBuilder();
-        if(fileList.length == 0) {
-            tree.add("tree : e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
-        }
+        StringBuilder fileContents = new StringBuilder();
 
-        for(File f : fileList) {
-            if(f.isDirectory()) {
-                addDirectory(folderName + "/" + f.getName());
-                Tree tree2 = new Tree();
-                File[] list = f.listFiles();
-                if(list != null) {
-                    for(File file : list) {
-                        tree2.add("blob : " + generateHash(file) + " : " + file.getName());
-                    }
-                    sb.append("tree : " + tree2.writeToObjects() + '\n');
-                    tree.add(sb.toString());
-                }
-                else{
-                    tree2.add("");
-                    tree.add("tree : " + tree2.writeToObjects());
-                }
+        for(File file : fileList) {
+            if(!file.isDirectory()) {
+                String name = file.getName();
+                Git git = new Git(true);
+                String path = folderName + "/" + name;
+                String blobSha1 = git.blob(path, true);
+                String lineToAdd = "blob : " + blobSha1 + " : " + name + '\n';
+                fileContents.append(lineToAdd);
             }
             else {
-                String name = f.getName();
-                blob(folderName + "/" + name);
-                BufferedReader br = new BufferedReader(new FileReader(folderName + "/" + name));
-                while(br.ready()) {
-                    sb.append((char) br.read());
-                }
-                String contents = sb.toString();
-                String sha1 = generateSha1(contents);
-                StringBuilder sb2 = new StringBuilder();
-                if(sb2.length() != 0)
-                    sb2.append('\n');
-                sb2.append("blob : " + sha1 + " : " + name);
-                tree.add(sb2.toString());
+                String name = file.getName();
+                String subFolderHash = addDirectory(folderName + "/" + name);
+                String lineToAdd = "tree : " + subFolderHash + " : " + name + '\n';
+                fileContents.append(lineToAdd);
             }
         }
-        String s = tree.writeToObjects();
-        removeNewLine("objects/" + s);
-        addToIndex(folderName, s);
-        return(s);
+        String ret = fileContents.toString();
+        ret = ret.substring(0, ret.length()-1);
+        String hash = Util.hashString(ret);
+        Util.writeFile("objects/" + hash, ret);
+        addToIndex(folderName, hash);
+        return hash;
     }
+    
 
     public String generateHash(File f) throws IOException, NoSuchAlgorithmException {
         BufferedReader br = new BufferedReader(new FileReader(f));
@@ -226,4 +242,6 @@ public class Git {
     // }
     // file.delete();
     // }
+
+
 }

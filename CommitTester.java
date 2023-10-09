@@ -2,7 +2,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 
 import org.junit.jupiter.api.DisplayName;
@@ -100,5 +102,58 @@ public class CommitTester {
         assertEquals(commitTree, treeHash1);
         assertEquals(prevCommit, "");
         assertEquals(nextCommit, c2);
+    }
+
+    @Test
+    void testCommitAdvanced2() throws Exception {
+        Util.deleteDirectory("objects");
+        Util.deleteFile("index");
+        
+        //creating git and first commit
+        Git git = new Git();
+        git.addToIndex("test1", "2f3c6b82e94acbefbdcc4ac1d00fcfb416892355");
+        git.addToIndex("test2", "ccf587c77d3c946812e21674ed3b95cb47ab0d6d");
+        Commit commit = new Commit("Commit", "Ari Meron");
+        String hash1 = commit.getHash();
+
+        //getting sha1 of first commit's tree
+        Tree tree1 = new Tree();
+        tree1.add("blob : 2f3c6b82e94acbefbdcc4ac1d00fcfb416892355 : test1");
+        tree1.add("blob : ccf587c77d3c946812e21674ed3b95cb47ab0d6d : test2");
+        String treeHash1 = tree1.getHash();
+
+        //creating second commit with a directory
+        File folder = new File("testFolder");
+        folder.mkdirs();
+        File hello = new File("testFolder/hello");
+        Util.writeFile("testFolder/hello", "hello");
+        File hello2 = new File("testFolder/hello2");
+        Util.writeFile("objects/hello2", "hello2");
+
+        String treeHash2 = git.addDirectory("testFolder");
+        Commit commit2 = new Commit(hash1, "commit2", "Ari Meron");
+        String hash2 = commit2.getHash();
+
+        //splits
+        String c1 = Util.readFile("objects/" + hash1);
+        String c2 = Util.readFile("objects/" + hash2);
+        String[] split1 = c1.split("\n");
+        String[] split2 = c2.split("\n");
+
+        String tree = split1[0];
+        String prevCommit = split1[1];
+        String nextCommit = split1[2];
+
+        assertEquals(tree, treeHash1);
+        assertEquals(prevCommit, "");
+        assertEquals(nextCommit, hash2);
+
+        String tree2 = split2[0];
+        String prevCommit2 = split2[1];
+        String nextCommit2 = split2[2];
+
+        assertEquals(tree2, treeHash2);
+        assertEquals(prevCommit2, hash1);
+        assertEquals(nextCommit2, "");
     }
 }

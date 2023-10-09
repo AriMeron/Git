@@ -7,7 +7,7 @@ import java.util.Map;
 public class Tree {
 
     private HashSet<String> trees;
-    private HashMap<String, String> blobs;
+    private HashMap<String, String> blobs;;
 
     public Tree() {
         blobs = new HashMap<String, String>();
@@ -20,9 +20,6 @@ public class Tree {
         if (splits.length == 2) {
             // Adding a commit's tree
             if (splits[0].equals("tree")) {
-                if (trees.contains(splits[1])) {
-                    throw new Exception("Cannot add a duplicate tree");
-                }
                 trees.add(splits[1]);
                 return;
             }
@@ -33,6 +30,9 @@ public class Tree {
                     throw new Exception("Cannot add a blob with a duplicate filename");
                 }
                 blobs.put(splits[2], splits[1]);
+                return;
+            } else if (splits[0].equals("tree")) {
+                trees.add(splits[1]);
                 return;
             }
         }
