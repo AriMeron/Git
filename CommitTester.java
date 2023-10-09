@@ -156,4 +156,10 @@ public class CommitTester {
         assertEquals(prevCommit2, hash1);
         assertEquals(nextCommit2, "");
     }
+
+    @Test
+    void testDelete() {
+        //creating 5 commits
+        
+    }
 }

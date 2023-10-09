@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 public class Commit {
     protected String treeHash, previousCommitHash, nextCommitHash, summary, author, date;
@@ -45,12 +46,14 @@ public class Commit {
         BufferedReader br = new BufferedReader(new FileReader("index"));
         while(br.ready()) {
             String line = (String) br.readLine();
-            tree += line + '\n';
+            if(line.charAt(0) != '*')
+                tree += line + '\n';
         }
         if (!previousCommitHash.equals(""))
             tree += "tree : " + getPrevTree();
+        else
+            tree = tree.substring(0, tree.length()-1);
         clearIndex();
-        tree = tree.substring(0, tree.length()-1);
         String hash = Util.hashString(tree);
         Util.writeFile("objects/" + hash, tree);
         return hash;
@@ -93,7 +96,8 @@ public class Commit {
         if(previousCommitHash.equals(""))
             return "";
         BufferedReader br = new BufferedReader(new FileReader("objects/" + previousCommitHash));
-        return (String) br.readLine();
+        String ret = (String) br.readLine();
+        return ret;
     }
 
     public void editPrevCommit() throws Exception {
@@ -114,7 +118,6 @@ public class Commit {
                 i++;
             }
             String builder = sb.toString();
-            System.out.println(builder);
             Util.deleteFile("objects/" + previousCommitHash);
             PrintWriter pw = new PrintWriter("objects/" + previousCommitHash);
             pw.print(sb.toString());
@@ -146,13 +149,14 @@ public class Commit {
             if(contains)
                 break;
         }
-        newTree += "tree : " + currTree;
+        //newTree += "tree : " + currTree;
 
         String contents = Util.readFile(fileName);
         String hash = Util.hashString(contents);
         Util.deleteFile("objects/" + hash);
 
         FileWriter fw = new FileWriter("index", true);
+        fw.write(newTree);
         fw.write("*deleted*" + fileName);
         fw.close();
         return Util.hashString(newTree);

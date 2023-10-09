@@ -155,7 +155,7 @@ public class Git {
         for(File file : fileList) {
             if(!file.isDirectory()) {
                 String name = file.getName();
-                Git git = new Git(true);
+                Git git = new Git(false);
                 String path = folderName + "/" + name;
                 String blobSha1 = git.blob(path, true);
                 String lineToAdd = "blob : " + blobSha1 + " : " + name + '\n';
