@@ -137,6 +137,7 @@ public class GitTester {
 
     @Test
     void testAddDirectory2() throws Exception {
+        Util.deleteDirectory("folder");
         Git git = new Git();
 
         File folder = new File("folder");
@@ -155,7 +156,7 @@ public class GitTester {
         String blobHash2 = git.generateSha1("test2");
 
         String added = git.addDirectory("folder");
-        String expectedTree = "blob : " + hash1 + " : test1\ntree : " + hash2 + " : folder/folder2";
+        String expectedTree = "tree : " + hash2 + " : folder2\nblob : " + hash1 + " : test1";
         String realTree = Util.readFile("objects/" + added);
 
         assertTrue(Util.exists("objects/" + hash1));
