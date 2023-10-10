@@ -1,4 +1,6 @@
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigInteger;
@@ -67,5 +69,23 @@ public class Util {
         }
 
         Files.createFile(pathObject);
+    }
+
+
+    public static void removeNewLine(String filename) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        BufferedReader br = new BufferedReader(new FileReader(filename));
+
+        while(br.ready()) {
+            char c = (char) br.read();
+            if(br.ready())
+                sb.append(c);
+            else
+                break;
+        }
+
+        FileWriter fw = new FileWriter(filename);
+        fw.write(sb.toString());
+        fw.close();
     }
 }

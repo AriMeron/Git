@@ -49,7 +49,7 @@ public class Commit {
             if(line.charAt(0) != '*')
                 tree += line + '\n';
         }
-        if (!previousCommitHash.equals(""))
+        if (!previousCommitHash.equals("") && !lastLineIsCommitTree())
             tree += "tree : " + getPrevTree();
         else
             tree = tree.substring(0, tree.length()-1);
@@ -57,6 +57,16 @@ public class Commit {
         String hash = Util.hashString(tree);
         Util.writeFile("objects/" + hash, tree);
         return hash;
+    }
+
+    public boolean lastLineIsCommitTree() throws IOException {
+        String index = Util.readFile("index");
+        String[] splits = index.split("\n");
+        String lastLine = splits[splits.length - 1];
+        String[] splitLastLine = lastLine.split(" : ");
+        if(splitLastLine.length == 2 && splitLastLine[0].equals("tree"))
+            return true;
+        return false;
     }
 
     public String writeToObjects() throws Exception {
@@ -149,15 +159,19 @@ public class Commit {
             if(contains)
                 break;
         }
-        //newTree += "tree : " + currTree;
+        if(currTree != null) {
+            newTree += "tree : " + currTree;
+        }
+        else
+            newTree = newTree.substring(0, newTree.length()-1);
 
         String contents = Util.readFile(fileName);
         String hash = Util.hashString(contents);
         Util.deleteFile("objects/" + hash);
 
         FileWriter fw = new FileWriter("index", true);
+        fw.write("*deleted*" + fileName + "\n");
         fw.write(newTree);
-        fw.write("*deleted*" + fileName);
         fw.close();
         return Util.hashString(newTree);
     }
@@ -174,4 +188,8 @@ public class Commit {
         else
             return splitLine[1];
     }    
+
+    public String getTree() {
+        return treeHash;
+    }
 }
