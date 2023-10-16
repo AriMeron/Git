@@ -6,7 +6,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -218,5 +220,65 @@ public class CommitTester {
         assertFalse(Util.exists("objects/" + test1Hash));
         expectedIndex = "*deleted*test1\nblob : " + test6Hash + " : test6\nblob : " + test3Hash + " : test3\nblob : " + test4Hash + " : test4\nblob : " + test2Hash + " : test2";
         assertEquals(expectedIndex, indexContents);
+    }
+
+    @Test
+    void testDeleteMultipleFiles() throws Exception {
+        Util.deleteDirectory("objects");
+        Util.deleteDirectory("index");
+        //creating 5 commits
+        Git git = new Git();
+
+        File test1 = new File("test1");
+        Util.writeFile("test1", "test1");
+        File test2 = new File("test2");
+        Util.writeFile("test2", "test2");
+        git.blob("test1");
+        git.blob("test2");
+        Commit commit1 = new Commit("first commit", "Ari Meron");
+
+        File test3 = new File("test3");
+        Util.writeFile("test3", "test3");
+        File test4 = new File("test4");
+        Util.writeFile("test4", "test4");
+        git.blob("test3");
+        git.blob("test4");
+        Commit commit2 = new Commit(commit1.getHash(), "second commit", "Ari Meron");
+
+        File test5 = new File("test5");
+        Util.writeFile("test5", "test5");
+        git.blob("test5");
+        Commit commit3 = new Commit(commit2.getHash(), "third commit", "Ari Meron");
+
+        File test6 = new File("test6");
+        Util.writeFile("test6", "test6");
+        git.blob("test6");
+        Commit commit4 = new Commit(commit3.getHash(), "fourth commit", "Ari Meron");
+
+        String test1Hash = Util.hashString("test1");
+        String test2Hash = Util.hashString("test2");
+        String test3Hash = Util.hashString("test3");
+        String test4Hash = Util.hashString("test4");
+        String test5Hash = Util.hashString("test5");
+        String test6Hash = Util.hashString("test6");
+
+        ArrayList<String> filesToDelete = new ArrayList<String>();
+        filesToDelete.add("test3");
+        filesToDelete.add("test5");
+
+        commit4.delete(filesToDelete);
+
+        assertFalse(Util.exists("objects/" + test3Hash));
+        assertFalse(Util.exists("objects/" + test5Hash));
+        String index = Util.readFile("index");
+        assertTrue(index.indexOf("*deleted*test3") != -1);
+        assertTrue(index.indexOf("*deleted*test5") != -1);
+
+        Commit commit5 = new Commit(commit4.getHash(), "final commit", "Ari Meron");
+        String expectedTree = "blob : " + test6Hash + " : test6\nblob : " + test4Hash + " : test4\ntree : " + commit1.getTree();
+        String realTree = Util.readFile("objects/" + commit5.getTree());
+
+        assertEquals(realTree, expectedTree);
+
     }
 }

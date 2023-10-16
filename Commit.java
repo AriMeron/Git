@@ -176,6 +176,48 @@ public class Commit {
         return Util.hashString(newTree);
     }
 
+    public String delete(ArrayList<String> filesToDelete) throws IOException, NoSuchAlgorithmException {
+        int len = filesToDelete.size();
+        String currTree = treeHash;
+        String newTree = "";
+        int count = 0;
+        while(currTree != null) {
+            BufferedReader br = new BufferedReader(new FileReader("objects/" + currTree));
+            while(br.ready()) {
+                String line = br.readLine();
+                String[] splits = line.split(" : ");
+                if(splits.length == 3) {
+                    String fileName = splits[2];
+                    if(!filesToDelete.contains(fileName))
+                        newTree += line + '\n';
+                    else {
+                        count++;
+                        String contents = Util.readFile(fileName);
+                        String hash = Util.hashString(contents);
+                        Util.deleteFile("objects/" + hash);
+                    }
+                }
+            }
+            currTree = getPrevTree(currTree);
+            if(count == len)
+                break;
+        }
+        if(currTree != null) {
+            newTree += "tree : " + currTree;
+        }
+        else
+            newTree = newTree.substring(0, newTree.length()-1);
+
+        FileWriter fw = new FileWriter("index", true);
+        for(int i = 0; i < len; i++) {
+            String fileName = filesToDelete.get(i);
+            fw.write("*deleted*" + fileName + "\n");
+        }
+        fw.write(newTree);
+        fw.close();
+        return Util.hashString(newTree);
+    }
+
 
     public String getPrevTree(String currTree) throws IOException {
 
